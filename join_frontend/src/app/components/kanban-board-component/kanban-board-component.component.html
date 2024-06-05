@@ -1,0 +1,149 @@
+<div *ngIf="isLoading">Loading...</div>
+<div *ngIf="!isLoading" class="kanban-board">
+  <div class="column">
+    <h2>To Do</h2>
+    <div *ngFor="let task of todos" class="task-card" (click)="openPopup(task)">
+      <h3>{{ task.title }}</h3>
+      <p>{{ task.description }}</p>
+      <p>Assigned to: {{ getContactNames(task.assigned_to) }}</p>
+    </div>
+  </div>
+  <div class="column">
+    <h2>In Progress</h2>
+    <div
+      *ngFor="let task of inProgress"
+      class="task-card"
+      (click)="openPopup(task)"
+    >
+      <h3>{{ task.title }}</h3>
+      <p>{{ task.description }}</p>
+      <p>Assigned to: {{ getContactNames(task.assigned_to) }}</p>
+    </div>
+  </div>
+  <div class="column">
+    <h2>Done</h2>
+    <div *ngFor="let task of done" class="task-card" (click)="openPopup(task)">
+      <h3>{{ task.title }}</h3>
+      <p>{{ task.description }}</p>
+      <p>Assigned to: {{ getContactNames(task.assigned_to) }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Popup for Task Details -->
+<div class="popup" *ngIf="isPopupOpen">
+  <div class="popup-content">
+    <h2>Edit Task</h2>
+    <form [formGroup]="taskForm" (ngSubmit)="saveChanges()">
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input
+          type="text"
+          id="title"
+          formControlName="title"
+          class="form-control"
+        />
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="due_date">Due Date</label>
+        <input
+          type="date"
+          id="due_date"
+          formControlName="due_date"
+          class="form-control"
+        />
+      </div>
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input
+          type="text"
+          id="category"
+          formControlName="category"
+          class="form-control"
+        />
+      </div>
+      <div class="form-group">
+        <label for="prio">Priority</label>
+        <input
+          type="number"
+          id="prio"
+          formControlName="prio"
+          class="form-control"
+          min="1"
+          max="5"
+        />
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" formControlName="status" class="form-control">
+          <option value="todo">To Do</option>
+          <option value="in_progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="assigned_to">Assigned Contacts</label>
+        <div
+          *ngFor="
+            let contactId of taskForm.value.assigned_to_ids;
+            let i = index
+          "
+        >
+          <span>{{ getContactName(contactId) }}</span>
+          <button type="button" (click)="removeContact(i)">Remove</button>
+        </div>
+        <select (change)="addContact($event)">
+          <option
+            *ngFor="let contact of contacts"
+            [value]="contact.id"
+            [disabled]="taskForm.value.assigned_to_ids.includes(contact.id)"
+          >
+            {{ contact.first_name }} {{ contact.last_name }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="newSubtask">New Subtask</label>
+        <input
+          type="text"
+          id="newSubtask"
+          formControlName="newSubtask"
+          class="form-control"
+        />
+        <button type="button" (click)="addSubtask()">Add Subtask</button>
+      </div>
+      <div class="form-group">
+        <label for="subtasks">Subtasks</label>
+        <div *ngFor="let subtask of taskForm.value.subtasks_data">
+          <span>{{ subtask.description }}</span>
+          <button type="button" (click)="removeSubtask(subtask)">Remove</button>
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="taskForm.invalid"
+      >
+        Save Changes
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="deleteTask(selectedTask!.id)"
+      >
+        Delete Task
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="closePopup()">
+        Close
+      </button>
+    </form>
+  </div>
+</div>
